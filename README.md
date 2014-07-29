@@ -29,7 +29,7 @@ Include files:
 ```
 
 ```javascript
-$(".cropper").imageCrop();
+$(".cropMain").imageCrop();
 or
 $('.cropMain').imageCrop({
     offsetLeft: 20,
