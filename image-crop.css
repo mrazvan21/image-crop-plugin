@@ -1,0 +1,41 @@
+.cropMain {
+    width:600px;
+    height:300px;
+    background:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAAHnlligAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAHJJREFUeNpi+P///5EjRxiAGMgCCCAGFB5AADGCRBgYjh49CiRZIJS1tTWQBAggFBkmBiSAogxFBiCAoHogAKIKAlBUYTELAiAmEtABEECk20G6BOmuIl0CIMBQ/IEMkO0myiSSraaaBhZcbkUOs0HuBwARxT7aD6kRXAAAAABJRU5ErkJggg==') repeat;
+    -webkit-box-shadow: inset 10px 0 6px rgba(0, 0, 0, 0.5);
+    box-shadow:inset 10px 0 6px rgba(0, 0, 0, 0.5);
+}
+
+.cropMain .crop-img { position: absolute }
+
+.cropMain .crop-container {
+    overflow: hidden;
+    position: relative;
+}
+
+.cropMain .crop-container:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5999;
+}
+
+.cropMain .crop-overlay {
+    position: relative;
+    cursor: move;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.border {
+    z-index:6000;
+    position:absolute;
+    background-color: #ffffff;
+    opacity: 0.8;
+    filter: alpha(opacity=80) /* For IE8 and earlier;
+}
