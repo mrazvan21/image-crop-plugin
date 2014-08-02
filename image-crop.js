@@ -90,9 +90,12 @@
 
         addListener: function () {
             this.$overlayCrop.on({
-                "mouseup": $.proxy(this.mouseup, this),
                 "mousedown": $.proxy(this.mousedown, this),
                 "mousemove": $.proxy(this.mousemove, this)
+            });
+
+            $(document).on({
+                "mouseup": $.proxy(this.mouseup, this)
             });
         },
 
