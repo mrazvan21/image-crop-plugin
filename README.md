@@ -2,6 +2,8 @@
 
 A simple jQuery image cropping plugin.
 
+![Image Crop Plugin](screenshot.png)
+
 # Features
 
 
