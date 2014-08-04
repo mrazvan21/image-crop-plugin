@@ -22,18 +22,17 @@ Include files:
 ## Usage
 
 ```html
-<div class="cropMain">
+<div class="crop-main">
     <div style="width: 600px; height: 300px;" class="crop-container">
-        <div style="z-index: 6000; top: 0px; left: 0px;" class="crop-overlay"></div>
-        <img src="image.jpg" style="z-index: 5999;" class="crop-img">
+        <img src="test.JPG" class="crop-img">
     </div>
 </div>
 ```
 
 ```javascript
-$(".cropMain").imageCrop();
+$(".crop-main").imageCrop();
 or
-$('.cropMain').imageCrop({
+$('.crop-main').imageCrop({
     offsetLeft: 20,
     offsetRight: 30,
     offsetTop: 20,

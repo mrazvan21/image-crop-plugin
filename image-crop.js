@@ -48,42 +48,62 @@
 
         build: function() {
             var defaults = this.defaults;
+            var self = this;
 
             //create element
-            var container = this.$element.find(defaults.container),
-                imageCrop = this.$element.find(defaults.cropImg),
-                overlayCrop = this.$element.find(defaults.overlayCrop);
+            this.$container = this.$element.find(defaults.container),
+            this.$imageCrop = this.$element.find(defaults.cropImg);
 
-            var containerWidth = parseFloat(container.width()),
-                containerHeight = parseFloat(container.height()),
-                imageCropWidth = parseFloat(imageCrop.width()),
-                imageCropHeight = parseFloat(imageCrop.height());
+            this.$overlayCrop = $('<div style="top: 0px; left: 0px;" class="crop-overlay"></div>');
+
+            this.containerWidth = parseFloat(this.$container.width()),
+            this.containerHeight = parseFloat(this.$container.height());
+
+            this.imageNaturalWidth = this.$imageCrop.prop('naturalWidth'),
+            this.imageNaturalHeight = this.$imageCrop.prop('naturalHeight');
+
+            this.percent = 0;
+            this.minPercent = Math.max(this.imageNaturalWidth ? this.containerWidth / this.imageNaturalWidth : 1, this.imageNaturalHeight ? this.containerHeight / this.imageNaturalHeight : 1 );
+
+            // image size
+            this.imageCropWidth = Math.ceil(this.imageNaturalWidth * this.minPercent);
+            this.imageCropHeight = Math.ceil(this.imageNaturalHeight * this.minPercent);
+            //set image size
+            this.updateImageSize();
 
             // border
-            var topBorder = $('<div class="border top" style="top:0px; height: '+defaults.offsetTop+'px; width:'+containerWidth+'px;"></div>'),
-                bottomBorder = $('<div class="border bottom" style="top:'+(containerHeight - defaults.offsetBottom)+'px; height: '+defaults.offsetBottom+'px; width:'+containerWidth+'px;"></div>'),
-                leftBorder = $('<div class="border left" style="top:'+defaults.offsetTop+'px; height: '+(containerHeight-defaults.offsetBottom-defaults.offsetTop)+'px; width:'+defaults.offsetLeft+'px;"></div>'),
-                rightBorder = $('<div class="border right" style="top:'+defaults.offsetTop+'px; left:'+(containerWidth-defaults.offsetRight)+'px; height: '+(containerHeight-defaults.offsetTop-defaults.offsetBottom)+'px; width:'+defaults.offsetRight+'px;"></div>');
+            var topBorder = $('<div class="border top" style="top:0px; height: '+defaults.offsetTop+'px; width:'+this.containerWidth+'px;"></div>'),
+                bottomBorder = $('<div class="border bottom" style="top:'+(this.containerHeight - defaults.offsetBottom)+'px; height: '+defaults.offsetBottom+'px; width:'+this.containerWidth+'px;"></div>'),
+                leftBorder = $('<div class="border left" style="top:'+defaults.offsetTop+'px; height: '+(this.containerHeight-defaults.offsetBottom-defaults.offsetTop)+'px; width:'+defaults.offsetLeft+'px;"></div>'),
+                rightBorder = $('<div class="border right" style="top:'+defaults.offsetTop+'px; left:'+(this.containerWidth-defaults.offsetRight)+'px; height: '+(this.containerHeight-defaults.offsetTop-defaults.offsetBottom)+'px; width:'+defaults.offsetRight+'px;"></div>');
 
-            container.append(topBorder);
-            container.append(bottomBorder);
-            container.append(leftBorder);
-            container.append(rightBorder);
+            this.$zoomIn = $('<a class="zoom-in"></a>'),
+            this.$zoomOut = $('<a class="zoom-out"></a>');
 
-            this.imagePosX = -imageCropWidth/2 + containerWidth/2;
-            this.imagePosY = -imageCropHeight/2 + containerHeight/2;
+            //controlls - zoom in, zoom out
+            var controlls = $('<div class="crop-controlls"><span>'+defaults.usageMessageInfo+'</span></div>');
 
-            this.imagePosXatStartMove = null;
-            this.imagePosYatStartMove  = null;
+            controlls.append(this.$zoomIn);
+            controlls.append(this.$zoomOut);
 
-            this.$container = container;
-            this.$imageCrop = imageCrop;
-            this.$overlayCrop = overlayCrop;
+            this.$container.append(this.$overlayCrop);
 
-            this.containerWidth = containerWidth;
-            this.containerHeight = containerHeight;
-            this.imageCropWidth = imageCropWidth;
-            this.imageCropHeight = imageCropHeight;
+            this.$container.append(topBorder);
+            this.$container.append(bottomBorder);
+            this.$container.append(leftBorder);
+            this.$container.append(rightBorder);
+
+            this.$container.append(controlls);
+
+            this.imagePosX = -this.imageCropWidth/2 + this.containerWidth/2;
+            this.imagePosY = -this.imageCropHeight/2 + this.containerHeight/2;
+
+            this.imagePosXatStartDrag = null;
+            this.imagePosYatStartDrag  = null;
+
+            this.$container.hover(function () {
+                self.$container.toggleClass('hover');
+            });
 
             // image default position
             this.updateImagePosition();
@@ -94,11 +114,19 @@
         addListener: function () {
             this.$overlayCrop.on({
                 "mousedown": $.proxy(this.mousedown, this),
-                "mousemove": $.proxy(this.mousemove, this)
+                "mousemove": $.proxy(this.drag, this)
             });
 
             $(document).on({
                 "mouseup": $.proxy(this.mouseup, this)
+            });
+
+            this.$zoomIn.on({
+                "click": $.proxy(this.zoomIn, this)
+            });
+
+            this.$zoomOut.on({
+                "click": $.proxy(this.zoomOut, this)
             });
         },
 
@@ -113,13 +141,13 @@
             this.startMoveY = e.pageY - offset.top;
 
             //set image pos at start move
-            this.imagePosXatStartMove = this.imagePosX;
-            this.imagePosYatStartMove = this.imagePosY;
+            this.imagePosXatStartDrag = this.imagePosX;
+            this.imagePosYatStartDrag = this.imagePosY;
 
             this.movement = true;
         },
 
-        mousemove: function (e) {
+        drag: function (e) {
             var offset = this.getOffset();
             var defaults = this.defaults;
 
@@ -130,8 +158,8 @@
                 return;
             }
 
-            var moveX = this.imagePosXatStartMove + relX - this.startMoveX,
-                moveY = this.imagePosYatStartMove + relY - this.startMoveY;
+            var moveX = this.imagePosXatStartDrag + relX - this.startMoveX,
+                moveY = this.imagePosYatStartDrag + relY - this.startMoveY;
 
             if (moveX - defaults.offsetLeft < 0 &&
                 ((Math.abs(moveX) - defaults.offsetRight) < (this.imageCropWidth - this.containerWidth))) {
@@ -146,6 +174,27 @@
             this.updateImagePosition();
         },
 
+        zoomIn  : function () {
+            return !! this.zoom( this.percent + 1 / ( this.defaults.zoom - 1 || 1 ) );
+        },
+
+        zoomOut  : function () {
+            return !! this.zoom( this.percent - 1 / ( this.defaults.zoom - 1 || 1 ) );
+        },
+
+        zoom: function ( percent ) {
+
+            this.percent = Math.max( this.minPercent, percent);
+
+            var oldImageCropWidth = this.imageCropWidth;
+            var oldImageCropHeight = this.imageCropHeight;
+
+            this.imageCropWidth = Math.ceil(this.imageNaturalWidth * this.percent);
+            this.imageCropHeight = Math.ceil(this.imageNaturalHeight * this.percent);
+
+            this.updateImageSize();
+        },
+
         reset: function () {
             this.movement = false;
             this.startMoveX = this.startMoveY = null;
@@ -157,16 +206,24 @@
                 'left': this.imagePosX
             });
         },
+
+        updateImageSize: function () {
+            this.$imageCrop.width(this.imageCropWidth);
+            this.$imageCrop.height(this.imageCropHeight);
+        }
     };
 
     ImageCrop.defaults = {
-        offsetLeft:   0,
-        offsetRight:  0,
-        offsetTop:    0,
-        offsetBottom: 0,
-        cropImg:      '.crop-img',
-        overlayCrop:  '.crop-overlay',
-        container:    '.crop-container'
+        width:          500,
+        height:         500,
+        offsetLeft:       0,
+        offsetRight:      0,
+        offsetTop:        0,
+        offsetBottom:     0,
+        cropImg:          '.crop-img',
+        container:        '.crop-container',
+        zoom:             250,
+        usageMessageInfo: 'Drag to move, scroll to zoom'
     };
 
     ImageCrop.setDefaults = function (options) {
