@@ -73,6 +73,9 @@
             this.imagePosX = -imageCropWidth/2 + containerWidth/2;
             this.imagePosY = -imageCropHeight/2 + containerHeight/2;
 
+            this.imagePosXatStartMove = null;
+            this.imagePosYatStartMove  = null;
+
             this.$container = container;
             this.$imageCrop = imageCrop;
             this.$overlayCrop = overlayCrop;
@@ -109,6 +112,10 @@
             this.startMoveX = e.pageX - offset.left;
             this.startMoveY = e.pageY - offset.top;
 
+            //set image pos at start move
+            this.imagePosXatStartMove = this.imagePosX;
+            this.imagePosYatStartMove = this.imagePosY;
+
             this.movement = true;
         },
 
@@ -123,14 +130,8 @@
                 return;
             }
 
-            var moveX = relX - this.startMoveX,
-                moveY = relY - this.startMoveY;
-
-            var mousePercentX = moveX / this.containerWidth * 30,
-                mousePercentY = moveY / this.containerHeight * 30;
-
-            moveX = this.imagePosX + mousePercentX;
-            moveY = this.imagePosY + mousePercentY;
+            var moveX = this.imagePosXatStartMove + relX - this.startMoveX,
+                moveY = this.imagePosYatStartMove + relY - this.startMoveY;
 
             if (moveX - defaults.offsetLeft < 0 &&
                 ((Math.abs(moveX) - defaults.offsetRight) < (this.imageCropWidth - this.containerWidth))) {
@@ -197,4 +198,3 @@
         return this;
     };
 });
-
