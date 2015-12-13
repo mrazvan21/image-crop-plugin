@@ -46,17 +46,8 @@
         },
 
         init: function () {
-            var self = this;
             this.reset();
-
-            $("#loading").show();
-
-            var self = this;
-            setTimeout(function() {
-                self.build();
-
-                $("#loading").hide();
-            }, 300);
+            this.build();
         },
 
         build: function() {
