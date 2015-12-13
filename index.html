@@ -1,0 +1,27 @@
+<html>
+<head>
+    <title>Image crop plugin</title>
+    <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script><!-- jQuery is required -->
+    <link  href="image-crop.css" rel="stylesheet">
+    <script src="image-crop.js"></script>
+</head>
+<body>
+    <div class="crop-main">
+        <div style="width: 600px; height: 300px;" class="crop-container">
+            <img src="datamodel.png" class="crop-img">
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('.crop-main').imageCrop({
+                offsetLeft: 20,
+                offsetRight: 50,
+                offsetTop: 80,
+                offsetBottom: 50
+            });
+        });
+    </script>
+</body>
+</html>
+
