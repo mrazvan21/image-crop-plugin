@@ -24,6 +24,7 @@
         ceil = Math.ceil,
         round = Math.round,
         floor = Math.floor,
+        zoomMouseEvent,
 
     // Constructor
     ImageCrop = function (element, options) {
@@ -53,7 +54,6 @@
         build: function() {
             var defaults = this.defaults;
             var self = this;
-
             //create element
             this.$container = this.$element.find(defaults.container);
             this.$imageCrop = this.$element.find(defaults.cropImg);
@@ -140,13 +140,27 @@
                 "mouseup": $.proxy(this.mouseup, this)
             });
 
+            this.$overlayCrop.on({
+                "scroll": $.proxy(this.scroll, this)
+            });
+
             this.$zoomIn.on({
+                "mousedown": $.proxy(this.zoomMousedown, this, "zoomIn"),
+                "mouseup": $.proxy(this.zoomMouseup, this)
+            });
+
+            this.$zoomOut.on({
+                "mousedown": $.proxy(this.zoomMousedown, this, "zoomOut"),
+                "mouseup": $.proxy(this.zoomMouseup, this)
+            });
+
+            /*this.$zoomIn.on({
                 "click": $.proxy(this.zoomIn, this)
             });
 
             this.$zoomOut.on({
                 "click": $.proxy(this.zoomOut, this)
-            });
+            });*/
         },
 
         mouseup: function (e) {
@@ -214,11 +228,36 @@
             this.updateImagePosition();
         },
 
-        zoomIn  : function () {
+        scroll: function (e) {
+            var oEvent = e.originalEvent,
+                delta  = oEvent.deltaY || oEvent.wheelDelta
+                ;
+
+            if (delta > 0) {
+                // Scrolled up
+                $.proxy(this.zoomOut, this);
+            } else {
+                // Scrolled down
+                $.proxy(this.zoomIn, this);
+            }
+        },
+
+        zoomMousedown: function (zoomMethod) {
+            zoomMouseEvent = setInterval(
+                $.proxy(this[zoomMethod], this),
+                100
+            );
+        },
+
+        zoomMouseup: function () {
+            clearInterval(zoomMouseEvent);
+        },
+
+        zoomIn: function () {
             return !! this.zoom( this.percent + 1 / ( this.defaults.zoom - 1 || 1 ) );
         },
 
-        zoomOut  : function () {
+        zoomOut: function () {
             return !! this.zoom( this.percent - 1 / ( this.defaults.zoom - 1 || 1 ) );
         },
 
